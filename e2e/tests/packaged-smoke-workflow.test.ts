@@ -427,6 +427,22 @@ describe("packaged smoke workflow", () => {
     expect(blobGuard).toContain("select(.status != \"removed\") | .filename");
   });
 
+  it("[P2] keeps cross-PR coordination observation read-only and outside the merge gate", async () => {
+    const workflow = await readFile(ciWorkflowPath, "utf8");
+    const shadow = workflow.slice(workflow.indexOf("  cross_pr_coordination_shadow:"));
+    const validate = sectionBetween(workflow, "  validate:", "  runtime_summary:");
+    const permissions = sectionBetween(workflow, "permissions:", "\nconcurrency:");
+
+    expect(shadow).toContain("if: ${{ github.event_name == 'pull_request' }}");
+    expect(shadow).toContain("continue-on-error: true");
+    expect(shadow).toContain("python3 .github/scripts/cross_pr_coordination_guard.py");
+    expect(shadow).toContain("--output \"$RUNNER_TEMP/cross-pr-coordination.json\"");
+    expect(validate).not.toContain("cross_pr_coordination_shadow");
+    expect(permissions).toContain("pull-requests: read");
+    expect(permissions).not.toContain("write");
+    expect(workflow).not.toContain("handoff-cross-pr");
+  });
+
   it("[P2] keeps merge queue as the authoritative post-PR validation path", async () => {
     const [ciWorkflow, dockerWorkflow, commentWorkflow, autofixWorkflow, reportWorkflow] = await Promise.all([
       readFile(ciWorkflowPath, "utf8"),

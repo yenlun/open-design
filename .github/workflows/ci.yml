@@ -1294,3 +1294,24 @@ jobs:
               )
             ][]
           ' "$run_json" >> "$GITHUB_STEP_SUMMARY"
+
+  cross_pr_coordination_shadow:
+    name: Cross-PR coordination (shadow)
+    needs: [runners]
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ${{ fromJSON(needs.runners.outputs.runs_on).control }}
+    timeout-minutes: 10
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - name: Observe competing PR coordination risks
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 .github/scripts/cross_pr_coordination_guard.py
+          --repository "${{ github.repository }}"
+          --pr-number "${{ github.event.pull_request.number }}"
+          --output "$RUNNER_TEMP/cross-pr-coordination.json"

@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "sources": [
+    "https://github.com/nexu-io/open-design/issues/6964",
+    "https://github.com/nexu-io/open-design/pull/7446",
+    "https://github.com/nexu-io/open-design/pull/7521",
+    "https://github.com/nexu-io/open-design/issues/7602",
+    "https://github.com/nexu-io/open-design/pull/7603",
+    "https://github.com/nexu-io/open-design/pull/7605",
+    "https://github.com/nexu-io/open-design/issues/7546",
+    "https://github.com/nexu-io/open-design/pull/7550",
+    "https://github.com/nexu-io/open-design/pull/7552"
+  ],
+  "pull_requests": [
+    {
+      "number": 7446,
+      "title": "fix(packaged): swallow EPIPE in console echo to stop main-process crash",
+      "body": "Reopening #6965, the replacement for the implementation addressing issue #6964.",
+      "state": "open",
+      "draft": false,
+      "head_sha": "0598a839c7697c1b7bde4863eaf25b2777395668",
+      "labels": ["needs-validation"],
+      "files": {
+        "apps/packaged/src/logging.ts": "+ installStdioErrorGuard([process.stdout, process.stderr]);\n+ export function isHarmlessStdoutError(error: unknown): boolean {\n+ return code === 'EPIPE' || code === 'ERR_STREAM_DESTROYED';",
+        "apps/packaged/tests/logging.test.ts": "+ expect(isHarmlessStdoutError(epipe)).toBe(true);\n+ expect(() => stream.emit('error', epipe)).not.toThrow();"
+      },
+      "reviews": [
+        {"reviewer": "PerishCode", "state": "APPROVED", "commit_id": "0598a839c7697c1b7bde4863eaf25b2777395668", "submitted_at": "2026-08-26T12:32:25Z"}
+      ]
+    },
+    {
+      "number": 7521,
+      "title": "fix(packaged): swallow EPIPE in console echo to stop main-process crash",
+      "body": "Fixes #6964",
+      "state": "open",
+      "draft": false,
+      "head_sha": "bc8ade6dd45ab2192a44908fab046ff9dca891e5",
+      "labels": ["needs-validation"],
+      "files": {
+        "apps/packaged/src/logging.ts": "+ installStdioErrorGuard([process.stdout, process.stderr]);\n+ export function isHarmlessStdoutError(error: unknown): boolean {\n+ return code === 'EPIPE' || code === 'ERR_STREAM_DESTROYED';",
+        "apps/packaged/tests/logging.test.ts": "+ expect(isHarmlessStdoutError(epipe)).toBe(true);\n+ expect(() => stream.emit('error', epipe)).not.toThrow();"
+      },
+      "reviews": [
+        {"reviewer": "nettee", "state": "CHANGES_REQUESTED", "commit_id": "bc8ade6dd45ab2192a44908fab046ff9dca891e5", "submitted_at": "2026-08-28T03:33:13Z"}
+      ]
+    },
+    {
+      "number": 7603,
+      "title": "fix(download): reject non-file OS artifact entries",
+      "body": "Fixes #7602",
+      "state": "open",
+      "draft": false,
+      "head_sha": "50578c6075f4c11d612c8990ac97647298e017df",
+      "labels": ["needs-validation"],
+      "files": {
+        "packages/download/src/store.ts": "+ const stats = await lstat(join(basePath, entry));\n+ return stats.isFile() && OS_ARTIFACTS.has(entry);",
+        "packages/download/tests/index.test.ts": "+ it('rejects a directory named .DS_Store', async () => {\n+ await expect(pruneManagedDownloads()).rejects.toMatchObject({ code: STORE_NOT_OWNED });"
+      },
+      "reviews": []
+    },
+    {
+      "number": 7605,
+      "title": "fix(download): verify OS-managed root artifacts are plain files",
+      "body": "Fixes #7602",
+      "state": "open",
+      "draft": false,
+      "head_sha": "63cae50320d8b6e201a3eb1b0877312b2e0d9c47",
+      "labels": ["needs-validation"],
+      "files": {
+        "packages/download/src/store.ts": "+ const stats = await lstat(join(basePath, entry));\n+ if (!stats.isFile()) return false;\n+ return OS_ARTIFACTS.has(entry);",
+        "packages/download/tests/index.test.ts": "+ it('does not claim a directory named .DS_Store', async () => {\n+ await expect(pruneManagedDownloads()).rejects.toMatchObject({ code: STORE_NOT_OWNED });"
+      },
+      "reviews": []
+    },
+    {
+      "number": 7550,
+      "title": "fix(daemon): normalize Gemini BYOK base URL and model id on the OpenCode run path",
+      "body": "Fixes #7546",
+      "state": "open",
+      "draft": false,
+      "head_sha": "2a8e0fab142db355ae327d64f0efd60d2b662a8e",
+      "labels": ["needs-validation"],
+      "files": {
+        "apps/daemon/src/runtimes/byok-opencode.ts": "+ const wireModel = protocol === 'google' ? googleRunModelId(rawModel) : rawModel;\n+ return `${googleGenerativeLanguageBaseUrl(baseUrl)}/v1beta`;",
+        "apps/daemon/tests/runtimes/byok-opencode.test.ts": "+ it('builds the same Gemini URL shape as the connection test', () => {\n+ expect(result?.modelId).toContain('models/google/gemini');"
+      },
+      "reviews": [
+        {"reviewer": "PerishCode", "state": "APPROVED", "commit_id": "2a8e0fab142db355ae327d64f0efd60d2b662a8e", "submitted_at": "2026-08-28T08:26:08Z"}
+      ]
+    },
+    {
+      "number": 7552,
+      "title": "fix(byok): normalize Gemini run config for third-party gateways",
+      "body": "Fixes #7546. Overlap note: #7550 addresses the same issue.",
+      "state": "open",
+      "draft": false,
+      "head_sha": "20bc905da8a8252f3b0dd186076947f42fc41066",
+      "labels": ["needs-validation"],
+      "files": {
+        "apps/daemon/src/runtimes/byok-opencode.ts": "+ const runModel = protocol === 'google' ? `models/${normalizeGoogleModelId(rawModel)}` : rawModel;\n+ return normalizeGoogleRunBaseUrl(trimmed);",
+        "apps/daemon/tests/runtimes/byok-opencode.test.ts": "+ it('normalizes third-party Gemini-compatible base URLs', () => {\n+ expect(result?.modelId).toContain('models/google/gemini');"
+      },
+      "reviews": [
+        {"reviewer": "PerishCode", "state": "APPROVED", "commit_id": "20bc905da8a8252f3b0dd186076947f42fc41066", "submitted_at": "2026-08-28T09:04:07Z"}
+      ]
+    },
+    {
+      "number": 7388,
+      "title": "fix(packaged): isolate headless runtime namespace",
+      "body": "Fixes #7154",
+      "state": "open",
+      "draft": false,
+      "head_sha": "1111111111111111111111111111111111111111",
+      "labels": [],
+      "files": {
+        "apps/packaged/src/headless-runtime.ts": "+ return `${namespace}-headless`;",
+        "apps/packaged/src/paths.ts": "+ const runtimeNamespace = normalizeNamespace(value);"
+      },
+      "reviews": []
+    },
+    {
+      "number": 7494,
+      "title": "fix(mcp): reuse an existing desktop daemon",
+      "body": "Fixes #7154",
+      "state": "open",
+      "draft": false,
+      "head_sha": "2222222222222222222222222222222222222222",
+      "labels": [],
+      "files": {
+        "apps/daemon/src/mcp-bootstrap.ts": "+ daemonUrl = await discoverTargetDaemonUrl(env, 300);",
+        "apps/daemon/tests/mcp-bootstrap.test.ts": "+ expect(discoverTargetDaemonUrl).toHaveBeenCalled();"
+      },
+      "reviews": []
+    },
+    {
+      "number": 7701,
+      "title": "fix(example): fold the latest reviewer state",
+      "body": "Fixes #7700",
+      "state": "open",
+      "draft": false,
+      "head_sha": "3333333333333333333333333333333333333333",
+      "labels": [],
+      "files": {"example.ts": "+ const current = true;"},
+      "reviews": [
+        {"reviewer": "reviewer", "state": "CHANGES_REQUESTED", "commit_id": "3333333333333333333333333333333333333333", "submitted_at": "2026-08-01T00:00:00Z"},
+        {"reviewer": "reviewer", "state": "APPROVED", "commit_id": "3333333333333333333333333333333333333333", "submitted_at": "2026-08-02T00:00:00Z"}
+      ]
+    },
+    {
+      "number": 7702,
+      "title": "fix(example): fold the latest reviewer state",
+      "body": "Fixes #7700",
+      "state": "open",
+      "draft": false,
+      "head_sha": "4444444444444444444444444444444444444444",
+      "labels": [],
+      "files": {"example.ts": "+ const current = true;"},
+      "reviews": [
+        {"reviewer": "other", "state": "APPROVED", "commit_id": "4444444444444444444444444444444444444444", "submitted_at": "2026-08-02T00:00:00Z"}
+      ]
+    },
+    {
+      "number": 6965,
+      "title": "fix(packaged): swallow EPIPE in console echo to stop main-process crash",
+      "body": "Fixes #6964",
+      "state": "closed",
+      "draft": false,
+      "head_sha": "0598a839c7697c1b7bde4863eaf25b2777395668",
+      "labels": ["validated"],
+      "files": {
+        "apps/packaged/src/logging.ts": "+ installStdioErrorGuard([process.stdout, process.stderr]);",
+        "apps/packaged/tests/logging.test.ts": "+ expect(isHarmlessStdoutError(epipe)).toBe(true);"
+      },
+      "reviews": []
+    }
+  ],
+  "expected_findings": [
+    {"signal": "COMPETING_IMPLEMENTATIONS", "prs": [7446, 7521]},
+    {"signal": "REVIEW_CONTRADICTION", "prs": [7446, 7521]},
+    {"signal": "DUPLICATE_VALIDATION", "prs": [7446, 7521]},
+    {"signal": "COMPETING_IMPLEMENTATIONS", "prs": [7550, 7552]},
+    {"signal": "DUPLICATE_VALIDATION", "prs": [7550, 7552]},
+    {"signal": "COMPETING_IMPLEMENTATIONS", "prs": [7603, 7605]},
+    {"signal": "DUPLICATE_VALIDATION", "prs": [7603, 7605]},
+    {"signal": "COMPETING_IMPLEMENTATIONS", "prs": [7701, 7702]}
+  ]
+}

@@ -1,0 +1,1 @@
+- **TypeScript** pour le code source de `apps/web/src/` et `apps/daemon/src/`.

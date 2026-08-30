@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "rules": [
+    {
+      "id": "typescript-first-daemon",
+      "description": "Contributor docs must not describe project-owned daemon source as JavaScript while repository policy and guard enforce TypeScript-first source.",
+      "sources": [
+        "https://github.com/nexu-io/open-design/pull/7513"
+      ],
+      "truth_anchors": [
+        {
+          "path": "AGENTS.md",
+          "pattern": "project-owned entrypoints, modules, scripts, tests, reporters, and configs should default to TypeScript"
+        },
+        {
+          "path": "scripts/guard.ts",
+          "pattern": "project-owned code is TypeScript-only"
+        }
+      ],
+      "documents": [
+        {
+          "glob": "CONTRIBUTING.md",
+          "contradictory_pattern": "daemon.*JavaScript"
+        },
+        {
+          "glob": "docs/i18n/CONTRIBUTING.*.md",
+          "contradictory_pattern": "daemon.*JavaScript"
+        }
+      ]
+    }
+  ]
+}

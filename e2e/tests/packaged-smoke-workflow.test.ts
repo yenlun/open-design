@@ -427,6 +427,21 @@ describe("packaged smoke workflow", () => {
     expect(blobGuard).toContain("select(.status != \"removed\") | .filename");
   });
 
+  it("[P2] keeps documentation drift observation read-only and outside the merge gate", async () => {
+    const workflow = await readFile(ciWorkflowPath, "utf8");
+    const shadow = workflow.slice(workflow.indexOf("  docs_drift_shadow:"));
+    const validate = sectionBetween(workflow, "  validate:", "  runtime_summary:");
+    const permissions = sectionBetween(workflow, "permissions:", "\nconcurrency:");
+
+    expect(shadow).toContain("if: ${{ github.event_name == 'pull_request' }}");
+    expect(shadow).toContain("continue-on-error: true");
+    expect(shadow).toContain("python3 .github/scripts/docs_drift_guard.py");
+    expect(shadow).toContain("--output \"$RUNNER_TEMP/docs-drift.json\"");
+    expect(validate).not.toContain("docs_drift_shadow");
+    expect(permissions).not.toContain("write");
+    expect(workflow).not.toContain("handoff-docs-drift");
+  });
+
   it("[P2] keeps merge queue as the authoritative post-PR validation path", async () => {
     const [ciWorkflow, dockerWorkflow, commentWorkflow, autofixWorkflow, reportWorkflow] = await Promise.all([
       readFile(ciWorkflowPath, "utf8"),

@@ -1294,3 +1294,22 @@ jobs:
               )
             ][]
           ' "$run_json" >> "$GITHUB_STEP_SUMMARY"
+
+  docs_drift_shadow:
+    name: Documentation drift (shadow)
+    needs: [runners]
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ${{ fromJSON(needs.runners.outputs.runs_on).control }}
+    timeout-minutes: 5
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - name: Observe configured documentation contradictions
+        run: >-
+          python3 .github/scripts/docs_drift_guard.py
+          --config .github/config/docs-drift.json
+          --root .
+          --output "$RUNNER_TEMP/docs-drift.json"

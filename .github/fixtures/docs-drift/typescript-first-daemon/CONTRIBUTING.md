@@ -1,0 +1,1 @@
+- **TypeScript** for `apps/web/src/`. The daemon (`apps/daemon/`) is plain ESM JavaScript with JSDoc when types matter — keep it that way.

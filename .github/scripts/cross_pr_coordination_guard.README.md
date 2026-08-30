@@ -24,6 +24,16 @@ The first version gated everything on `file_similarity >= 0.8` (files-in-common 
 
 The latest commit (`ci: improve cross-PR guard recall`) adds two narrower paths in `is_competing()`: a strong relation (shared issue, or explicit replace/supersede/reopen language) plus any shared file at `file_similarity >= 0.15`; and, when there is no explicit reference, a lowered `CANDIDATE_TITLE_SIMILARITY = 0.45` combined with `file_similarity >= 0.3`. Both paths are covered by a new regression fixture (4 synthetic PRs, `e2e/tests/scripts/cross-pr-coordination-guard.test.ts`) run with `--strict`, so the recall improvement is asserted, not just described.
 
+## Historical evaluation
+
+The v1 detector rejected an initial 30-pair negative batch, but a separate 200-pair blind-to-prediction evaluation found four real competing pairs and v1 missed all four. Those revealed pairs became the v2 development set: v2 recovered all four positives while preserving all 196 negatives.
+
+The detector was then frozen and tested on a fresh, non-overlapping holdout of 100 historical pairs (25 candidate-enriched and 75 strict controls, covering 107 PRs). Human labels were locked before identities, strata, and predictions were revealed. The holdout contained one new competing pair, #7454/#7419; v2 correctly emitted both `COMPETING_IMPLEMENTATIONS` and `DUPLICATE_VALIDATION`, with no false positives or false negatives across the 100 pairs.
+
+That is useful out-of-sample evidence, not production-grade proof: the fresh holdout contained only one positive and no true review contradiction. The defensible result is **100/100 exact agreement on this stratified holdout**, while keeping the guard shadow-only until more independently labeled positives are available.
+
 ## Why shadow mode
 
 `cross_pr_coordination_shadow` in `ci.yml` runs only on `pull_request`, with `continue-on-error: true` and the default read-scoped `github.token`. It observes and posts a summary; it does not comment on PRs, label them, or affect merge status. Same reasoning as the docs-drift guard: prove the signal holds up against real, already-open PRs in this repository before proposing it become a blocking check.
+
+This branch is a portfolio PoC maintained in a personal fork. It does not represent official OpenDesign adoption or a commitment by upstream maintainers to operate the guard.

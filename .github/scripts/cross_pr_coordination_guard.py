@@ -24,6 +24,7 @@ ISSUE_REFERENCE_RE = re.compile(
 )
 PR_REFERENCE_RE = re.compile(r"(?i)(?:replace[sd]?|supersede[sd]?|reopen(?:ing|ed)?)\s+(?:pr\s*)?#(\d+)")
 TITLE_WORD_RE = re.compile(r"[a-z0-9]+")
+CANDIDATE_TITLE_SIMILARITY = 0.45
 
 
 class GuardError(ValueError):
@@ -141,7 +142,7 @@ def candidate_relation(left: PullRequest, right: PullRequest) -> dict[str, Any] 
         if left_title and right_title
         else 0.0
     )
-    if not shared_issues and not replacement and title_similarity < 0.92:
+    if not shared_issues and not replacement and title_similarity < CANDIDATE_TITLE_SIMILARITY:
         return None
     return {
         "shared_issues": shared_issues,
@@ -185,11 +186,20 @@ def implementation_similarity(left: PullRequest, right: PullRequest) -> dict[str
 def is_competing(relation: dict[str, Any], similarity: dict[str, Any]) -> bool:
     file_similarity = float(similarity["file_similarity"])
     patch_similarity = float(similarity["patch_similarity"])
+    has_shared_files = bool(similarity["shared_files"])
+    strong_relation = bool(relation["shared_issues"] or relation["replacement"])
+    if strong_relation and has_shared_files and file_similarity >= 0.15:
+        return True
+    if (
+        float(relation["title_similarity"]) >= CANDIDATE_TITLE_SIMILARITY
+        and has_shared_files
+        and file_similarity >= 0.3
+    ):
+        return True
     if file_similarity < 0.8:
         return False
     if patch_similarity >= 0.75:
         return True
-    strong_relation = bool(relation["shared_issues"] or relation["replacement"])
     return strong_relation and similarity["same_file_set"] and patch_similarity >= 0.2
 
 

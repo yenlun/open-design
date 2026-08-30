@@ -18,9 +18,15 @@ This guard turns that class of bug into something CI can watch for, instead of r
 
 `--self-check` replays the exact #7513 contradiction against fixtures under `.github/fixtures/docs-drift/` and asserts the guard finds exactly that one contradiction, no more and no less. A second test runs the same rule against the real repository root instead of the fixture, and asserts the already-fixed French guide is *not* flagged — so correctness is checked against the live repository, not only against a canned example.
 
+The historical baseline produced seven findings: the root `CONTRIBUTING.md` plus six localized guides still made the stale JavaScript claim. Running the same detector against #7513's corrected head produced zero findings. This `7 findings -> 0 findings` transition shows that the rule both identifies the known contradiction and clears after the documentation is synchronized.
+
+The evidence is intentionally narrow. It validates one explicit TypeScript-first rule family; it does not claim general semantic understanding of documentation or automatic discovery of every possible source-to-doc mismatch.
+
 ## Why shadow mode
 
 `docs_drift_shadow` in `ci.yml` runs only on `pull_request`, sets `continue-on-error: true`, and requests no write permissions. It observes and posts a summary; it cannot block a merge or touch PR state. The goal is to prove the signal is trustworthy against real history before ever proposing it become a required check.
+
+This branch is a portfolio PoC maintained in a personal fork. It does not represent official OpenDesign adoption or a commitment by upstream maintainers to operate the guard.
 
 ## Adding a rule
 

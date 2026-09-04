@@ -1,0 +1,40 @@
+name: Portfolio Shadow CI - Documentation Drift
+
+# Personal-fork portfolio evidence only. This workflow is intentionally
+# separate from the upstream merge gate and has no write permissions.
+on:
+  push:
+    branches:
+      - dx/docs-drift-poc
+    paths:
+      - AGENTS.md
+      - CONTRIBUTING.md
+      - docs/i18n/CONTRIBUTING.*.md
+      - scripts/guard.ts
+      - .github/config/docs-drift.json
+      - .github/fixtures/docs-drift/**
+      - .github/scripts/docs_drift_guard.py
+      - .github/workflows/portfolio-docs-drift-shadow.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portfolio-docs-drift-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify documentation drift detector
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - name: Replay historical contradiction fixture
+        run: python3 .github/scripts/docs_drift_guard.py --self-check
+
+      - name: Observe current repository
+        run: python3 .github/scripts/docs_drift_guard.py --root . --strict

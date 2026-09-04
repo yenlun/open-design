@@ -1,5 +1,7 @@
 # Cross-PR coordination guard (shadow)
 
+[![Portfolio Shadow CI - Cross-PR Coordination](https://github.com/yenlun/open-design/actions/workflows/portfolio-cross-pr-shadow.yml/badge.svg?branch=dx%2Fcross-pr-coordination-guard)](https://github.com/yenlun/open-design/actions/workflows/portfolio-cross-pr-shadow.yml?query=branch%3Adx%2Fcross-pr-coordination-guard)
+
 ## Why this exists
 
 Two contributors can independently fix the same problem without either noticing, and reviewers can end up giving contradictory verdicts on essentially the same change because nothing surfaces the link between the PRs. That is not hypothetical in this repository right now: [#7446](https://github.com/nexu-io/open-design/pull/7446) and [#7521](https://github.com/nexu-io/open-design/pull/7521) both add the same `installStdioErrorGuard` fix for the same EPIPE crash (#6964) with near-identical code — `PerishCode` approved #7446, `nettee` requested changes on #7521. Same fix, opposite verdicts, both still open and both still consuming reviewer attention in the `needs-validation` queue.

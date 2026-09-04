@@ -8,6 +8,7 @@ on:
       - dx/cross-pr-coordination-guard
     paths:
       - .github/fixtures/cross-pr-coordination-history.json
+      - .github/scripts/cross_pr_coordination_guard.README.md
       - .github/scripts/cross_pr_coordination_guard.py
       - .github/workflows/portfolio-cross-pr-shadow.yml
   workflow_dispatch:

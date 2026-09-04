@@ -1,5 +1,7 @@
 # Documentation drift guard (shadow)
 
+[![Portfolio Shadow CI - Documentation Drift](https://github.com/yenlun/open-design/actions/workflows/portfolio-docs-drift-shadow.yml/badge.svg?branch=dx%2Fdocs-drift-poc)](https://github.com/yenlun/open-design/actions/workflows/portfolio-docs-drift-shadow.yml?query=branch%3Adx%2Fdocs-drift-poc)
+
 ## Why this exists
 
 Contributor-facing docs can silently fall out of sync with what the repository actually enforces. This already happened: [#7513](https://github.com/nexu-io/open-design/pull/7513) found that `CONTRIBUTING.md` told contributors the daemon (`apps/daemon/`) was "plain ESM JavaScript", while `AGENTS.md` and `scripts/guard.ts` both require project-owned source to be TypeScript-first — and the fix still had to go back for a second round before all seven localized copies were caught up.

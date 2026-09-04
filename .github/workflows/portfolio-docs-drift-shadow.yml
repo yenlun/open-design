@@ -13,6 +13,7 @@ on:
       - scripts/guard.ts
       - .github/config/docs-drift.json
       - .github/fixtures/docs-drift/**
+      - .github/scripts/docs_drift_guard.README.md
       - .github/scripts/docs_drift_guard.py
       - .github/workflows/portfolio-docs-drift-shadow.yml
   workflow_dispatch:
